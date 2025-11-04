@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Ejercicio_2.Modelos
 {
@@ -22,8 +23,18 @@ namespace Ejercicio_2.Modelos
 
         public void RecibirCamion(Camion unCamion)
         {
-            listaCamiones.Add(unCamion);
-            NroOrden= unCamion.NroRegistro;
+            if (unCamion.NroRegistro != NroOrden)
+            {
+             foreach (Camion camion in listaCamiones)
+                {
+                    if (camion.NroRegistro == unCamion.NroRegistro)
+                    {
+                        throw new Exception("El camion ya fue recibido");
+                    }
+                }
+                listaCamiones.Add(unCamion);
+            }
+                NroOrden = unCamion.NroRegistro;
         }
 
         public Auto DescargarCamion(int nroRegistroCamion)
@@ -79,8 +90,9 @@ namespace Ejercicio_2.Modelos
             {
 
                 {
-
                     string path = camion.ToString() + ".csv";
+
+                    MessageBox.Show(path);
 
                     FileStream fs = null;
                     StreamWriter sw = null;
@@ -98,6 +110,7 @@ namespace Ejercicio_2.Modelos
                     }
                     catch (Exception ex)
                     {
+                        MessageBox.Show($"Error al crear el archivo CSV: {ex.Message}");
                     }
                     finally
                     {

@@ -47,14 +47,14 @@ namespace Ejercicio_2.Modelos
             int i = 0;
             foreach (Auto auto in transporte)
             {
-                carga[i] = auto.toString();
+                carga[i] = auto.ToString();
                 i++;
             }
             return carga;
         }
-        public string toString()
+        override public string ToString()
         {
-            return $"{NroRegistro}-{fecha.ToShortDateString()}";
+            return $"{NroRegistro}_{fecha.ToString("dd-MM-yyyy")}";
         }
 
         public double ValorAsegurado()

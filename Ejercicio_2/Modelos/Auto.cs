@@ -16,14 +16,15 @@ namespace Ejercicio_2.Modelos
         {
             this.numeroRegistro = numeroRegistro;
             this.modelo = modelo;
+            this.Precio = precio;
         }
         public int NroRegistro()
         {
             return numeroRegistro;
         }
-        public string toString()
+        override public string ToString()
         {
-            return $"{numeroRegistro};{modelo}";
+            return $"{numeroRegistro};{modelo};{Precio}";
         }
     }
 }

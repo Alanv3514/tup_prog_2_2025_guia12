@@ -94,100 +94,162 @@ namespace Ejercicio_2
             btnCargarCamion.Enabled = true;
             btnCrearCamion.Enabled = false;
             btnCerrarCamion.Enabled = true;
+            btnRecibirCamion.Enabled = false;
         }
 
         private void btnCargarCamion_Click(object sender, EventArgs e)
         {
-            Auto a = listBox1.SelectedItem as Auto;
-            listBox1.Items.Remove(a);
-            sys.CargarCamion(nroRegistro, a);
-            listBox2.Items.Add(a);
-
-            btnDescargar.Enabled = true;
-            if (listBox1.Items.Count == 0)
+            try
             {
-                btnCargarCamion.Enabled = false;
+                Auto a = listBox1.SelectedItem as Auto;
+                listBox1.Items.Remove(a);
+                sys.CargarCamion(nroRegistro, a);
+                listBox2.Items.Add(a);
+
+                btnDescargar.Enabled = true;
+                btnDescargarCamion.Enabled = true;
+                if (listBox1.Items.Count == 0)
+                {
+                    btnCargarCamion.Enabled = false;
+                }
+            }
+            catch(Exception err)
+            {
+                MessageBox.Show(err.Message);
             }
         }
 
         private void btnDescargarCamion_Click(object sender, EventArgs e)
         {
-            Auto a = sys.DescargarCamion(nroRegistro);
-            listBox1.Items.Add(a);
-            listBox2.Items.Remove(a);
-            if(listBox2.Items.Count == 0)
+            try
             {
-                btnDescargar.Enabled = false;
+                Auto a = sys.DescargarCamion(nroRegistro);
+                listBox1.Items.Add(a);
+                listBox2.Items.Remove(a);
+                if(listBox2.Items.Count == 0)
+                {
+                    btnDescargar.Enabled = false;
+                }
             }
-        }
+            catch(Exception err)
+            {
+                MessageBox.Show(err.Message);
+            }
+}
 
         private void btnCerrarCamion_Click(object sender, EventArgs e)
         {
-            sys.CerrarCamion(nroRegistro);
-            listBox2.Items.Clear();
+            try
+            {
+                sys.CerrarCamion(nroRegistro);
+                listBox2.Items.Clear();
 
-            btnCargarCamion.Enabled = false;
-            btnCerrarCamion.Enabled = false;
-            btnDescargarCamion.Enabled = false;
-            btnDescargar.Enabled = false;
-            btnCrearCamion.Enabled = true;
+                btnCargarCamion.Enabled = false;
+                btnCerrarCamion.Enabled = false;
+                btnDescargarCamion.Enabled = false;
+                btnDescargar.Enabled = false;
+                btnCrearCamion.Enabled = true;
+                btnRecibirCamion.Enabled = true;
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
+            }
+
         }
 
         private void btnRecibirCamion_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sfd= new SaveFileDialog();
-            sfd.Filter = "(*.csv)|*.csv";
-
-            if (sfd.ShowDialog() == DialogResult.OK)
+            try
             {
-                string ruta = sfd.FileName;
-                DateTime f = DateTime.Parse(ruta.Split(';')[0]);
-                int lineas = 0;
+                OpenFileDialog sfd = new OpenFileDialog();
+                sfd.Filter = "(*.csv)|*.csv";
 
-                using (StreamReader sw = new StreamReader(ruta))
+                if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    
-                    string[] cDato = ruta.Split(';');//campo0 es el numero de registro, campo 1 es la fecha y la cantidad de lineas sera la capacidad
-                    
-                    //agrego los autos del camion al listbox2
-                    while (!sw.EndOfStream)
+                    string ruta = sfd.FileName;
+                    string[] fDato = Path.GetFileNameWithoutExtension(ruta).Split('_');
+
+
+                    // Suponiendo que la fecha está en cDato[1] y en formato "dd-MM-aaaa"
+                    DateTime f = DateTime.ParseExact(fDato[1], "dd-MM-yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                    int lineas = 0;
+
+
+                    using (StreamReader sw = new StreamReader(ruta))
                     {
-                        lineas++;
-                        string linea = sw.ReadLine();
-                        string[] datos = linea.Split(';');
-                        int nroRegistroAuto = int.Parse(datos[0]);
-                        string modelo = datos[1];
-                        double precio = double.Parse(datos[2]);
-                        Auto auto = new Auto(nroRegistroAuto, modelo, precio);
-                        listBox2.Items.Add(auto);
-                    }
-                    Camion camion = new Camion(f, lineas);
-                    foreach (Auto auto in listBox2.Items)
-                    {
-                        camion.CargarVehiculo(auto);
+                        //agrego los autos del camion al listbox2
+                        while (!sw.EndOfStream)
+                        {
+                            string linea = sw.ReadLine();
+                            if (lineas > 0)
+                            {
+
+                                string[] datos = linea.Split(';');
+                                MessageBox.Show($"linea {lineas}>"+linea);
+                                int nroRegistroAuto = int.Parse(datos[0]);
+                                string modelo = datos[1];
+                                double precio = double.Parse(datos[2]);
+
+
+                                Auto auto = new Auto(nroRegistroAuto, modelo, precio);
+                                listBox2.Items.Add(auto);
+                            }
+
+                            lineas++;
+                        }
+
+                        Camion camion = new Camion(f, lineas);
+
+                        foreach (Auto auto in listBox2.Items)
+                        {
+                            camion.CargarVehiculo(auto);
+                        }
+
+                        sys.RecibirCamion(camion);
+                        nroRegistro = camion.NroRegistro;
                     }
 
-                    sys.RecibirCamion(camion);
+                    btnDescargar.Enabled = true;
+                    btnCargarCamion.Enabled = true;
+                    btnDescargarCamion.Enabled = true;
+                    btnCerrarCamion.Enabled = true;
+                    MessageBox.Show("Camion recibido, cargado al sistema y al listbox2.");
                 }
-                btnDescargar.Enabled = true;
-                MessageBox.Show("Camion recibido, cargado al sistema y al listbox2.");
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
             }
         }
 
         private void btnDescargar_Click(object sender, EventArgs e)
         {
-            //este metodo descarga todo el camion en la lista de autos de la consecionaria
-            Auto a;
-            do
+            try
             {
-                a = sys.DescargarCamion(nroRegistro);
-                if(a!=null)
+                //este metodo descarga todo el camion en la lista de autos de la consecionaria
+                Auto a=null;
+                do
                 {
-                    listBox1.Items.Add(a);
-                    listBox2.Items.Remove(a);
-                }
-            } while (a != null);
-            btnDescargar.Enabled = false;
+                    a = sys.DescargarCamion(nroRegistro);
+                    if (a != null)
+                    {
+                        listBox1.Items.Add(a);
+                        listBox2.Items.Remove(a);
+                    }
+                } while (a != null);
+                btnDescargar.Enabled = false;
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
+            }
+
+
+        }
+
+        private void tbCapacidad_TextChanged(object sender, EventArgs e)
+        {
 
         }
     }

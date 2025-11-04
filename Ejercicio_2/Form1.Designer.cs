@@ -78,6 +78,8 @@
             this.tbCapacidad.Name = "tbCapacidad";
             this.tbCapacidad.Size = new System.Drawing.Size(67, 20);
             this.tbCapacidad.TabIndex = 7;
+            this.tbCapacidad.Text = "20";
+            this.tbCapacidad.TextChanged += new System.EventHandler(this.tbCapacidad_TextChanged);
             // 
             // label2
             // 
